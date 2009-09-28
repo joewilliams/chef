@@ -51,8 +51,7 @@ class Chef
         unless device_check(@new_resource.raid_device)
           command = "yes | mdadm --create #{@new_resource.raid_device} --chunk=#{@new_resource.chunk} --level #{@new_resource.level} --raid-devices #{@new_resource.devices.length} #{@new_resource.devices.collect{|x| x + " "}.to_s.chop}"
           Chef::Log.debug("mdadm command: #{command}")
-          status = popen4(command) do |pid, stdin, stdout, stderr|
-          end
+          pid, stdin, stdout, stderr = popen4(command)
           Chef::Log.info("Created mdadm raid device (#{@new_resource.raid_device})")
         else
           Chef::Log.debug("mdadm raid device already exists. (#{@new_resource.raid_device})")

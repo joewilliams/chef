@@ -31,8 +31,8 @@ class Chef
         @level = 1
         @raid_device = ""
 
-        @action = "create"
-        @allowed_actions.push(:create)
+        @action = :create
+        @allowed_actions.push(:create, :assemble, :stop)
       end
 
       def chunk(arg=nil)

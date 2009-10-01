@@ -33,6 +33,19 @@ class Chef
         true
       end
 
+      def rule_check(rule)
+        command = "ufw status"
+        array = []
+        status = popen4(command) do |pid, stdin, stdout, stderr|
+          stdout.each do |line|
+            unless line == "\n"
+              line.downcase!
+              array << line.split
+            end
+          end
+        end
+      end
+
       def action_allow
         command = "ufw allow #{@new_resource.dest_port}"
         run_command(:command => command)

@@ -58,13 +58,7 @@ describe Chef::Provider::Mdadm, "action_create" do
     @provider.stub!(:create).and_return(true)
   end
 
-  it "should create the device if it doesn't exist" do
-    @current_resource.stub!(:exists).and_return(false)
-    @provider.should_receive(:create).with.and_return(true)
-    @provider.action_create
-  end
-
-  it "should not create the device if it doesn't exist" do
+  it "should not create the device if it does exist" do
     @current_resource.stub!(:exists).and_return(true)
     @provider.should_not_receive(:create).with.and_return(true)
     @provider.action_create
@@ -97,13 +91,7 @@ describe Chef::Provider::Mdadm, "action_assemble" do
     @provider.stub!(:assemble).and_return(true)
   end
 
-  it "should assemble the device if it doesn't exist" do
-    @current_resource.stub!(:exists).and_return(false)
-    @provider.should_receive(:assemble).with.and_return(true)
-    @provider.action_assemble
-  end
-
-  it "should not assemble the device if it doesn't exist" do
+  it "should not assemble the device if it does exist" do
     @current_resource.stub!(:exists).and_return(true)
     @provider.should_not_receive(:assemble).with.and_return(true)
     @provider.action_assemble
@@ -134,12 +122,6 @@ describe Chef::Provider::Mdadm, "action_stop" do
     @provider = Chef::Provider::Mdadm.new(@node, @new_resource)
     @provider.current_resource = @current_resource
     @provider.stub!(:stop).and_return(true)
-  end
-
-  it "should stop the device if it exists" do
-    @current_resource.stub!(:exists).and_return(false)
-    @provider.should_receive(:stop).with.and_return(true)
-    @provider.action_stop
   end
 
   it "should not stop the device if it doesn't exist" do

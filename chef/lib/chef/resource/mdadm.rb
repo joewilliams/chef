@@ -52,14 +52,6 @@ class Chef
         )
       end
 
-      def exists(arg=nil)
-        set_or_return(
-          :exists,
-          arg,
-          :kind_of => [ TrueClass, FalseClass ]
-        )
-      end
-
       def level(arg=nil)
         set_or_return(
           :level,

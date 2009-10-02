@@ -28,6 +28,7 @@ class Chef
 
         @chunk = 16
         @devices = []
+        @exists = false
         @level = 1
         @raid_device = ""
 
@@ -48,6 +49,14 @@ class Chef
           :devices,
           arg,
           :kind_of => [ Array ]
+        )
+      end
+
+      def exists(arg=nil)
+        set_or_return(
+          :exists,
+          arg,
+          :kind_of => [ TrueClass, FalseClass ]
         )
       end
 

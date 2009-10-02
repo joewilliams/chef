@@ -36,15 +36,14 @@ class Chef
 
       def device_check(device)
         command = "mdadm --detail --scan"
-        check = false
         status = popen4(command) do |pid, stdin, stdout, stderr|
           stdout.each do |line|
             if line.include? device
-              check = true
+              @current_resource.exists = true
             end
           end
         end
-        check
+        @current_resource.exists
       end
 
       def action_create

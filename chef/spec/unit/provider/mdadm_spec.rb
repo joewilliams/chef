@@ -23,6 +23,7 @@ describe Chef::Provider::Mdadm, "initialize" do
   before(:each) do
     @node = mock("Chef::Node", :null_object => true)
     @new_resource = mock("Chef::Resource", :null_object => true)
+    @provider = Chef::Provider::Mdadm.new(@node, @new_resource)
   end
 
   it "should return a Chef::Provider::Mdadm object" do
@@ -30,6 +31,9 @@ describe Chef::Provider::Mdadm, "initialize" do
     provider.should be_a_kind_of(Chef::Provider::Mdadm)
   end
 
+  it "should return true" do
+    @provider.load_current_resource.should eql(true)
+  end
 end
 
 describe Chef::Provider::Mdadm, "action_create" do
@@ -41,8 +45,7 @@ describe Chef::Provider::Mdadm, "action_create" do
     :name => "test",
     :devices => ["/dev/sda", "/dev/sdb"],
     :chunk => 256,
-    :level => 1,
-    :exists => false
+    :level => 1
     )
     @current_resource = mock("Chef::Resource::Mdadm",
     :null_object => true,
@@ -50,19 +53,13 @@ describe Chef::Provider::Mdadm, "action_create" do
     :name => "test",
     :devices => ["/dev/sda", "/dev/sdb"],
     :chunk => 256,
-    :level => 1,
-    :exists => false
+    :level => 1
     )
     @provider = Chef::Provider::Mdadm.new(@node, @new_resource)
     @provider.current_resource = @current_resource
     @provider.stub!(:create).and_return(true)
   end
 
-  it "should not create the device if it does exist" do
-    @current_resource.stub!(:exists).and_return(true)
-    @provider.should_not_receive(:create).with.and_return(true)
-    @provider.action_create
-  end
 end
 
 describe Chef::Provider::Mdadm, "action_assemble" do
@@ -74,8 +71,7 @@ describe Chef::Provider::Mdadm, "action_assemble" do
     :name => "test",
     :devices => ["/dev/sda", "/dev/sdb"],
     :chunk => 256,
-    :level => 1,
-    :exists => false
+    :level => 1
     )
     @current_resource = mock("Chef::Resource::Mdadm",
     :null_object => true,
@@ -83,19 +79,14 @@ describe Chef::Provider::Mdadm, "action_assemble" do
     :name => "test",
     :devices => ["/dev/sda", "/dev/sdb"],
     :chunk => 256,
-    :level => 1,
-    :exists => false
+    :level => 1
     )
     @provider = Chef::Provider::Mdadm.new(@node, @new_resource)
     @provider.current_resource = @current_resource
     @provider.stub!(:assemble).and_return(true)
   end
 
-  it "should not assemble the device if it does exist" do
-    @current_resource.stub!(:exists).and_return(true)
-    @provider.should_not_receive(:assemble).with.and_return(true)
-    @provider.action_assemble
-  end
+
 end
 
 describe Chef::Provider::Mdadm, "action_stop" do
@@ -107,8 +98,7 @@ describe Chef::Provider::Mdadm, "action_stop" do
     :name => "test",
     :devices => ["/dev/sda", "/dev/sdb"],
     :chunk => 256,
-    :level => 1,
-    :exists => false
+    :level => 1
     )
     @current_resource = mock("Chef::Resource::Mdadm",
     :null_object => true,
@@ -116,17 +106,12 @@ describe Chef::Provider::Mdadm, "action_stop" do
     :name => "test",
     :devices => ["/dev/sda", "/dev/sdb"],
     :chunk => 256,
-    :level => 1,
-    :exists => false
+    :level => 1
     )
     @provider = Chef::Provider::Mdadm.new(@node, @new_resource)
     @provider.current_resource = @current_resource
     @provider.stub!(:stop).and_return(true)
   end
 
-  it "should not stop the device if it doesn't exist" do
-    @current_resource.stub!(:exists).and_return(true)
-    @provider.should_not_receive(:stop).with.and_return(true)
-    @provider.action_stop
-  end
+
 end

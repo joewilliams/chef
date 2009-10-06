@@ -31,24 +31,24 @@ class Chef
       end
 
       def load_current_resource
-        true
-      end
+        @current_resource = Chef::Resource::Mdadm.new(@new_resource.name)
+        @current_resource.raid_device(@new_resource.raid_device)
+        Chef::Log.debug("Checking for software raid device #{@current_resource.raid_device}")
 
-      def device_check(device)
         command = "mdadm --detail --scan"
-        check = false
+        exists = false
         status = popen4(command) do |pid, stdin, stdout, stderr|
           stdout.each do |line|
-            if line.include? device
-              check = true
+            if line.include? @new_resource.raid_device
+              exists = true
             end
           end
         end
-        check
+        @current_resource.exists(exists)
       end
 
       def action_create
-        unless device_check(@new_resource.raid_device)
+        unless @current_resource.exists
           command = "yes | mdadm --create #{@new_resource.raid_device} --chunk=#{@new_resource.chunk} --level #{@new_resource.level} --raid-devices #{@new_resource.devices.length} #{@new_resource.devices.collect{|x| x + " "}.to_s.chop}"
           Chef::Log.debug("mdadm command: #{command}")
           pid, stdin, stdout, stderr = popen4(command)
@@ -59,7 +59,7 @@ class Chef
       end
 
       def action_assemble
-        unless device_check(@new_resource.raid_device)
+        unless @current_resource.exists
           command = "yes | mdadm --assemble #{@new_resource.raid_device} #{@new_resource.devices.collect{|x| x + " "}.to_s.chop}"
           Chef::Log.debug("mdadm command: #{command}")
           pid, stdin, stdout, stderr = popen4(command)
@@ -70,7 +70,7 @@ class Chef
       end
 
       def action_stop
-        if device_check(@new_resource.raid_device)
+        if @current_resource.exists
           command = "yes | mdadm --stop #{@new_resource.raid_device}"
           Chef::Log.debug("mdadm command: #{command}")
           pid, stdin, stdout, stderr = popen4(command)

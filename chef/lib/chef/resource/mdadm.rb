@@ -30,7 +30,7 @@ class Chef
         @devices = []
         @exists = false
         @level = 1
-        @raid_device = ""
+        @raid_device = name
 
         @action = :create
         @allowed_actions.push(:create, :assemble, :stop)

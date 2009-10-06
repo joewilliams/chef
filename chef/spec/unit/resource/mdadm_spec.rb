@@ -62,4 +62,9 @@ describe Chef::Resource::Mdadm do
     @resource.devices ["/dev/sda", "/dev/sdb"]
     @resource.devices.should eql(["/dev/sda", "/dev/sdb"])
   end
+
+  it "should allow you to set the exists attribute" do
+    @resource.exists true
+    @resource.exists.should eql(true)
+  end
 end

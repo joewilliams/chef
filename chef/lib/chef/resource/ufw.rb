@@ -26,8 +26,64 @@ class Chef
         super(name, collection, node)
         @resource_name = :ufw
 
+        @dest_port = nil
+        @dest_addr = nil
+        @src_port = nil
+        @src_addr = "anywhere"
+        @protocol = nil
+        @type = "allow"
+
+        @action = :create
+        @allowed_actions.push(:create, :delete)
       end
 
+      def dest_port(arg=nil)
+        set_or_return(
+          :dest_port,
+          arg,
+          :kind_of => [ Integer ]
+        )
+      end
+
+      def dest_addr(arg=nil)
+        set_or_return(
+          :dest_addr,
+          arg,
+          :kind_of => [ String ]
+        )
+      end
+
+      def src_port(arg=nil)
+        set_or_return(
+          :src_port,
+          arg,
+          :kind_of => [ Integer ]
+        )
+      end
+
+      def src_addr(arg=nil)
+        set_or_return(
+          :src_addr,
+          arg,
+          :kind_of => [ String ]
+        )
+      end
+
+      def protocol(arg=nil)
+        set_or_return(
+          :protocol,
+          arg,
+          :kind_of => [ String ]
+        )
+      end
+
+      def type(arg=nil)
+        set_or_return(
+          :type,
+          arg,
+          :kind_of => [ String ]
+        )
+      end
 
     end
   end

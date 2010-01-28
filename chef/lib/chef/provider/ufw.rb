@@ -30,7 +30,7 @@ class Chef
       end
 
       def load_current_resource
-        @current_resource = Chef::Resource::Mdadm.new(@new_resource.name)
+        @current_resource = Chef::Resource::Ufw.new(@new_resource.name)
         @current_resource.name(@new_resource.name)
         Chef::Log.debug("Checking for ufw rule #{@current_resource.name}")
 
@@ -47,6 +47,8 @@ class Chef
         rule_list.shift
         rule_list.shift
         rule_list.shift
+
+        rule = build_rule(@new_resource.dest_port, @new_resource.dest_addr, @new_resource.src_port, @new_resource.src_addr, @new_resource.protocol, @new_resource.type)
 
         exists = false
         rule_list.each do |entry|
@@ -115,6 +117,16 @@ class Chef
           command = "#{ufw} #{type} proto #{protocol} from #{src_addr} port #{src_port} to any port #{dest_port}"
         end
 
+        if dest_port && dest_addr && protocol && src_port.nil? && src_addr != "anywhere"
+          # example: ufw allow proto tcp from 192.168.0.0/16 port 8081 to 10.211.26.47
+          command = "#{ufw} #{type} proto #{protocol} from #{src_addr} to #{dest_addr}"
+        end
+
+        if dest_port && dest_addr && protocol && src_port && src_addr != "anywhere"
+          # example: ufw allow proto tcp from 192.168.0.0/16 to 10.211.26.47 port 8081
+          command = "#{ufw} #{type} proto #{protocol} from #{src_addr} to #{dest_addr} port #{dest_port}"
+        end
+
         if dest_port && dest_addr && src_port && src_addr && protocol
           # example: ufw allow proto tcp from 192.168.0.0/16 port 7809 to 1.1.1.1 port 9090
           command = "#{ufw} #{type} proto #{protocol} from #{src_addr} port #{src_port} to #{dest_addr} port #{dest_port}"
@@ -128,7 +140,7 @@ class Chef
           rule = build_rule(@new_resource.dest_port, @new_resource.dest_addr, @new_resource.src_port, @new_resource.src_addr, @new_resource.protocol, @new_resource.type)
           command = build_cmd(@new_resource.dest_port, @new_resource.dest_addr, @new_resource.src_port, @new_resource.src_addr, @new_resource.protocol, @new_resource.action, @new_resource.type)
           run_command(:command => command)
-          Chef::Log.debug("created ufw rule (#{@new_resource.name})")
+          Chef::Log.info("Created ufw rule (#{@new_resource.name})")
         else
           Chef::Log.debug("ufw rule already exists (#{@new_resource.name})")
         end
@@ -139,7 +151,7 @@ class Chef
           rule = build_rule(@new_resource.dest_port, @new_resource.dest_addr, @new_resource.src_port, @new_resource.src_addr, @new_resource.protocol, @new_resource.type)
           command = build_cmd(@new_resource.dest_port, @new_resource.dest_addr, @new_resource.src_port, @new_resource.src_addr, @new_resource.protocol, @new_resource.action, @new_resource.type)
           run_command(:command => command)
-          Chef::Log.debug("deleted ufw rule (#{@new_resource.name})")
+          Chef::Log.info("Deleted ufw rule (#{@new_resource.name})")
         else
           Chef::Log.debug("ufw rule doesn't exist (#{@new_resource.name})")
         end

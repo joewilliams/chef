@@ -32,6 +32,7 @@ class Chef
         @src_addr = "anywhere"
         @protocol = nil
         @type = "allow"
+        @exists = false
 
         @action = :create
         @allowed_actions.push(:create, :delete)
@@ -82,6 +83,14 @@ class Chef
           :type,
           arg,
           :kind_of => [ String ]
+        )
+      end
+
+      def exists(arg=nil)
+        set_or_return(
+          :exists,
+          arg,
+          :kind_of => [ TrueClass, FalseClass ]
         )
       end
 

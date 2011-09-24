@@ -159,6 +159,7 @@ class Chef
         run_context = setup_run_context
         converge(run_context)
         save_updated_node
+        save_local_node_cache
 
         run_status.stop_clock
         Chef::Log.info("Chef Run complete in #{run_status.elapsed_time} seconds")
@@ -201,6 +202,19 @@ class Chef
       unless Chef::Config[:solo]
         Chef::Log.debug("Saving the current state of node #{node_name}")
         @node.save
+      end
+    end
+    
+    def save_local_node_cache
+      Chef::Config[:attributes_path] = File.join(Chef::Config[:file_cache_path], "attributes")
+
+      begin
+        file = File.open(Chef::Config[:attributes_path], "w")
+        file.puts @node.to_json
+      rescue  Exception => error
+        Chef::Application.fatal!("Got an unexpected error caching attributes!: " + error)
+      ensure
+        file.close
       end
     end
 

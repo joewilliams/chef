@@ -206,15 +206,17 @@ class Chef
     end
     
     def save_local_node_cache
-      Chef::Config[:attributes_path] = File.join(Chef::Config[:file_cache_path], "attributes")
-
-      begin
-        file = File.open(Chef::Config[:attributes_path], "w")
-        file.puts @node.to_json
-      rescue  Exception => error
-        Chef::Application.fatal!("Got an unexpected error caching attributes!: " + error)
-      ensure
-        file.close
+      unless Chef::Config[:solo]
+        Chef::Config[:attributes_path] = File.join(Chef::Config[:file_cache_path], "attributes")
+        
+        begin
+          file = File.open(Chef::Config[:attributes_path], "w")
+          file.puts @node.to_json
+        rescue  Exception => error
+          Chef::Application.fatal!("Got an unexpected error caching attributes!: " + error)
+        ensure
+          file.close
+        end
       end
     end
 

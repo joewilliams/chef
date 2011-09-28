@@ -144,6 +144,8 @@ class Chef
     def run
       run_context = nil
 
+      Chef::Config[:attributes_path] = File.join(Chef::Config[:file_cache_path], "attributes")
+
       Chef::Log.info("*** Chef #{Chef::VERSION} ***")
       enforce_path_sanity
       run_ohai
@@ -204,11 +206,9 @@ class Chef
         @node.save
       end
     end
-    
+
     def save_local_node_cache
       unless Chef::Config[:solo]
-        Chef::Config[:attributes_path] = File.join(Chef::Config[:file_cache_path], "attributes")
-        
         begin
           file = File.open(Chef::Config[:attributes_path], "w")
           file.puts @node.to_json

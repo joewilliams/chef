@@ -600,7 +600,24 @@ class Chef
 
     # Load a node by name
     def self.load(name)
-      Chef::REST.new(Chef::Config[:chef_server_url]).get_rest("nodes/#{name}")
+      begin
+        Chef::REST.new(Chef::Config[:chef_server_url]).get_rest("nodes/#{name}")
+      rescue
+        Chef::Log.error("Could not contact Chef server for node data, attempting to fail back to local cache!")
+        Chef::Config[:attributes_path] = File.join(Chef::Config[:file_cache_path], "attributes")
+        if File.exists?(Chef::Config[:attributes_path])
+          begin
+            file = File.open(Chef::Config[:attributes_path], "r")
+            Chef::JSONCompat.from_json(file.read)
+          rescue
+            Chef::Application.fatal!("Error reading cached attributes!")
+          ensure
+            file.close
+          end
+        else
+          Chef::Application.fatal!("Attributes cache file not found!")
+        end
+      end
     end
 
     # Remove this node from the CouchDB

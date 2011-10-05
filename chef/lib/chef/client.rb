@@ -143,12 +143,22 @@ class Chef
     # true:: Always returns true.
     def run
       run_context = nil
+      fallback_mode = false
 
       Chef::Log.info("*** Chef #{Chef::VERSION} ***")
       enforce_path_sanity
       run_ohai
       register unless Chef::Config[:solo]
-      build_node
+
+      begin
+        build_node
+      rescue SocketError, Errno::ETIMEDOUT, Errno::ECONNREFUSED, Timeout::Error, Net::HTTPFatalError => e
+        Chef::Log.debug("Network related exception: #{e.class} - #{e.message}\n#{e.backtrace.join("\n  ")}")
+        Chef::Log.info("Could not contact chef-server, attempting to use cache!")
+        @node = Chef::Node.build(node_name)
+        @run_status = Chef::RunStatus.new(@node)
+        fallback_mode = true
+      end
 
       begin
 
@@ -156,9 +166,22 @@ class Chef
         Chef::Log.info("Starting Chef Run for #{node.name}")
         run_started
 
-        run_context = setup_run_context
+        if fallback_mode
+          if $run_context_cache
+            run_context = $run_context_cache
+          else
+            Chef::Application.fatal!("Run context has not yet been cached cannot continue Chef run!")
+          end
+        else
+          run_context = setup_run_context
+        end
+
         converge(run_context)
-        save_updated_node
+        cache_run_context(run_context)
+
+        unless fallback_mode
+          save_updated_node
+        end
 
         run_status.stop_clock
         Chef::Log.info("Chef Run complete in #{run_status.elapsed_time} seconds")
@@ -201,6 +224,12 @@ class Chef
       unless Chef::Config[:solo]
         Chef::Log.debug("Saving the current state of node #{node_name}")
         @node.save
+      end
+    end
+
+    def cache_run_context(run_context)
+      unless Chef::Config[:solo]
+        $run_context_cache = run_context
       end
     end
 
